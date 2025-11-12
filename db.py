@@ -1,26 +1,30 @@
-import mysql.connector #pip install mysql-connector-python
+from flask import Flask
+import mysql.connector
 
-# Connect to MySQL
-conn = mysql.connector.connect(
-    host="192.168.18.15",
-    user="siouch",
-    password="ouch16091997",
-    database="guesthouse"
-)
+app = Flask(__name__)
 
-# Create a cursor
-cursor = conn.cursor()
+# MySQL config
+DB_CONFIG = {
+    "host": "192.168.18.15",
+    "user": "siouch",
+    "password": "ouch16091997",
+    "database": "guesthouse"
+}
 
-# Example: Insert one record
-sql = "INSERT INTO users (name, email) VALUES (%s, %s)"
-val = ("John Doe", "john@example.com")
-cursor.execute(sql, val)
+@app.route('/')
+def insert_user():
+    try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        sql = "INSERT INTO users (name, email) VALUES (%s, %s)"
+        val = ("John Doe", "john@example.com")
+        cursor.execute(sql, val)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return f"{cursor.rowcount} record inserted!"
+    except Exception as e:
+        return f"Error: {e}"
 
-# Commit the transaction
-conn.commit()
-
-print(cursor.rowcount, "record inserted.")
-
-# Close connection
-cursor.close()
-conn.close()
+if __name__ == "__main__":
+    app.run(host="192.168.18.15", port=8080, debug=True)
